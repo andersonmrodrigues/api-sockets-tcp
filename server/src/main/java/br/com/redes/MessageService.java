@@ -27,6 +27,12 @@ class MessageService implements Runnable {
     private OutputStream outputStream = null;
 
 
+    /**
+     * Método responsável por inicializar a classe com as informações que foram recebidas do cliente
+     *
+     * @param socket
+     * @throws IOException
+     */
     public MessageService(Socket socket) throws IOException {
         this.client = socket;
         this.outputStream = client.getOutputStream();
@@ -34,6 +40,9 @@ class MessageService implements Runnable {
         this.gson = new Gson();
     }
 
+    /**
+     * Método responsável por processar o dado a partir da mensagem recebida
+     */
     @Override
     public void run() {
         log.info(clientMessage);
@@ -41,6 +50,13 @@ class MessageService implements Runnable {
         sendDataToClient(content);
     }
 
+    /**
+     * Método responsável por transformar a mensagem recebida em bytes para textos
+     *
+     * @param socket
+     * @return
+     * @throws IOException
+     */
     private String getMessageFromSocketInput(Socket socket) throws IOException {
         InputStream is = socket.getInputStream();
         byte[] buffer = new byte[1024];
@@ -52,6 +68,12 @@ class MessageService implements Runnable {
         return "";
     }
 
+    /**
+     * Método responsável por identificar o que deve ser executado ou não a partir da mensagem do cliente
+     *
+     * @param clientMessage
+     * @return
+     */
     private String getDataByClientMessage(String clientMessage) {
         switch (clientMessage) {
             case "/quem":
@@ -76,6 +98,11 @@ class MessageService implements Runnable {
         return "Mensagem não identificada";
     }
 
+    /**
+     * Método responsável por buscar 10 posts de um usuário no twitter
+     *
+     * @return
+     */
     private String getTrends() {
         URL url = null;
         HttpURLConnection con = null;
@@ -101,6 +128,12 @@ class MessageService implements Runnable {
         return getContentFormatted(content);
     }
 
+    /**
+     * Método responsável por formatar o retorno recebido da API do Twitter
+     *
+     * @param content
+     * @return
+     */
     private String getContentFormatted(StringBuffer content) {
         try {
             StringBuilder sb = new StringBuilder();
@@ -118,6 +151,11 @@ class MessageService implements Runnable {
         return "";
     }
 
+    /**
+     * Método responsável por retornar as informações gerais do servidor como: info do disco, memória e processador
+     *
+     * @return
+     */
     private String getInfo() {
         StringBuilder sb = new StringBuilder();
         sb = putDiskInfo(sb);
@@ -134,20 +172,26 @@ class MessageService implements Runnable {
         return sb.toString();
     }
 
+    /**
+     * Método responsável por processar as informações do disco local do servidor
+     *
+     * @param sb
+     * @return
+     */
     private StringBuilder putDiskInfo(StringBuilder sb) {
         File fileC = new File("c:");
         long totalC = fileC.getTotalSpace() / 1024 / 1024 / 1024;
         long usedC = fileC.getFreeSpace() / 1024 / 1024 / 1024;
-
-        File fileD = new File("d:");
-        long totalD = fileC.getTotalSpace() / 1024 / 1024 / 1024;
-        long usedD = fileC.getFreeSpace() / 1024 / 1024 / 1024;
         sb.append("Disco C: (Total/Livre): ").append(totalC).append("/").append(usedC);
-        sb.append(System.lineSeparator());
-        sb.append("Disco D: (Total/Livre): ").append(totalD).append("/").append(usedD);
         return sb;
     }
 
+    /**
+     * Método responsável por buscar e processar as informações de temperatura do processador
+     *
+     * @param sb
+     * @return
+     */
     private StringBuilder putProcessorsTemperatureInfo(StringBuilder sb) {
         Components components = JSensors.get.components();
         List<Cpu> cpus = components.cpus;
@@ -166,11 +210,21 @@ class MessageService implements Runnable {
         return sb;
     }
 
+    /**
+     * Método responsável por buscar o S.O. do servidor
+     *
+     * @return
+     */
     private String getSO() {
         String os = System.getProperty("os.name");
         return os;
     }
 
+    /**
+     * Método responsável por buscar o MAC do servidor.
+     *
+     * @return
+     */
     private String getMac() {
         var mac = "";
         try {
@@ -188,6 +242,11 @@ class MessageService implements Runnable {
         return mac;
     }
 
+    /**
+     * Método responsável por buscar a cotação atual do dolar em BRL
+     *
+     * @return
+     */
     private String getUSDValue() {
         BufferedReader in = null;
         var content = "";
@@ -211,18 +270,29 @@ class MessageService implements Runnable {
         return getDolarValueFromContent(content);
     }
 
+    /**
+     * Método responsável por processar o retorno recebido da API de consulta de cotação do dolar
+     *
+     * @param content
+     * @return
+     */
     private String getDolarValueFromContent(String content) {
         var value = "";
         try {
             JsonObject jsonObject = gson.fromJson(content, JsonObject.class);
             JsonObject jsonObjectDolarProperties = gson.fromJson(jsonObject.get("USDBRL").toString(), JsonObject.class);
-            value = jsonObject.get("high") + " " + jsonObject.get("codein");
+            value = jsonObjectDolarProperties.get("high") + " " + jsonObjectDolarProperties.get("codein");
         } catch (Exception e) {
             e.printStackTrace();
         }
         return value;
     }
 
+    /**
+     * Método responsável responsável por retornar as informações sobre IP do servidor.
+     *
+     * @return
+     */
     private String getServerIp() {
         var ips = "";
         ips += getLocalIp();
@@ -230,6 +300,11 @@ class MessageService implements Runnable {
         return ips;
     }
 
+    /**
+     * Método responsável por retornar informações do IP externo do servidor.
+     *
+     * @return
+     */
     private String getExternalIp() {
         try {
             var ip = getExternalIpWithAWS();
@@ -241,6 +316,12 @@ class MessageService implements Runnable {
         return "";
     }
 
+    /**
+     * Método responsável por processar as informações de IP externo do servidor através da API de checkip da Amazon
+     *
+     * @return
+     * @throws IOException
+     */
     private String getExternalIpWithAWS() throws IOException {
         URL requestIp = new URL("http://checkip.amazonaws.com");
         BufferedReader in = null;
@@ -260,6 +341,11 @@ class MessageService implements Runnable {
         }
     }
 
+    /**
+     * Método responsável por buscar o ip interno do servidor
+     *
+     * @return
+     */
     private String getLocalIp() {
         try {
             String[] localHost = InetAddress.getLocalHost().toString().split("/");
@@ -271,6 +357,11 @@ class MessageService implements Runnable {
         return "";
     }
 
+    /**
+     * Método responsável por buscar e formatar a data atual do servidor
+     *
+     * @return
+     */
     private String getServerDate() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         try {
@@ -285,6 +376,11 @@ class MessageService implements Runnable {
         return "";
     }
 
+    /**
+     * Método responsável por buscar o hostname do servidor
+     *
+     * @return
+     */
     private String getHostname() {
         try {
             return InetAddress.getLocalHost().getHostName();
@@ -295,6 +391,12 @@ class MessageService implements Runnable {
         return "";
     }
 
+    /**
+     * Método responsável por enviar a informação que foi processada a partir da mensagem
+     * do cliente de volta para o cliente
+     *
+     * @param data
+     */
     private void sendDataToClient(String data) {
         byte[] buffer = data.getBytes();
         try {

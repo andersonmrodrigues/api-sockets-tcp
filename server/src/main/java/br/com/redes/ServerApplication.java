@@ -12,6 +12,13 @@ public class ServerApplication {
     public static final int PORT = 8899;
 
 
+    /**
+     * Método principal do servidor, nele é aberto um ponto de fluxo na porta especificada
+     * Também irá aceitar requisições na porta e também abrirá uma thread para cada uma, para que uma chamada não
+     * bloqueie outra de ser recebida,
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         ServerSocket ss = null;
         Socket socket = null;

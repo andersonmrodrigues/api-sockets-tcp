@@ -11,7 +11,7 @@
 
     <artifactId>server</artifactId>
     <groupId>br.com.redes</groupId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
 
